@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Burger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: #f44336;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        main {
+            padding: 1rem;
+        }
+        h2 {
+            color: #f44336;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #d32f2f;
+        }
+        #order-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Flash BURGER</h1>
+        <p>BIENVENUE.</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Menu</h2>
+            <ul>
+                <li>
+                    <span>Panini - 500 FCFA</span>
+                    <button onclick="addToOrder('Panini 500', 500)">Ajouter</button>
+                </li>
+                <li>
+                    <span>Panini - 700 FCFA</span>
+                    <button onclick="addToOrder('Panini 700', 700)">Ajouter</button>
+                </li>
+                <li>
+                    <span>Panini - 1000 FCFA</span>
+                    <button onclick="addToOrder('Panini 1000', 1000)">Ajouter</button>
+                </li>
+                <li>
+                    <span>Hamburger - 1000 FCFA</span>
+                    <button onclick="addToOrder('Hamburger 1000', 1000)">Ajouter</button>
+                </li>
+                <li>
+                    <span>Hamburger - 1500 FCFA</span>
+                    <button onclick="addToOrder('Hamburger 1500', 1500)">Ajouter</button>
+                </li>
+                <li>
+                    <span>Chawarma - 1000 FCFA</span>
+                    <button onclick="addToOrder('Chawarma 1000', 1000)">Ajouter</button>
+                </li>
+                <li>
+                    <span>Chawarma - 1500 FCFA</span>
+                    <button onclick="addToOrder('Chawarma 1500', 1500)">Ajouter</button>
+                </li>
+            </ul>
+        </section>
+
+        <section id="order-summary">
+            <h2>Votre Commande</h2>
+            <div id="order-list">Aucune commande pour l'instant.</div>
+            <p>Total : <span id="total">0</span> FCFA</p>
+            <button onclick="finalizeOrder()">Finaliser la commande</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Flash Burger. Tous droits réservés. Made by BGI 00226 57 65 56 00</p>
+    </footer>
+
+    <script>
+        let order = [];
+        let total = 0;
+
+        function addToOrder(item, price) {
+            const existingItem = order.find(o => o.name === item);
+
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                order.push({ name: item, price: price, quantity: 1 });
+            }
+
+            total += price;
+            updateOrder();
+        }
+
+        function updateOrder() {
+            const orderList = document.getElementById("order-list");
+            const totalDisplay = document.getElementById("total");
+
+            if (order.length === 0) {
+                orderList.innerHTML = "Aucune commande pour l'instant.";
+            } else {
+                orderList.innerHTML = order
+                    .map(item => `<div>${item.name} x${item.quantity}</div>`)
+                    .join("");
+            }
+
+            totalDisplay.textContent = total;
+        }
+
+        function finalizeOrder() {
+            if (order.length === 0) {
+                alert("Votre commande est vide !");
+            } else {
+                const summary = order.map(item => `${item.name} x${item.quantity}`).join(", ");
+                alert(`Commande confirmée : ${summary}\nTotal : ${total} FCFA`);
+                order = [];
+                total = 0;
+                updateOrder();
+            }
+        }
+    </script>
+</body>
+</html>
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "VOTRE_API_KEY",
+        authDomain: "VOTRE_AUTH_DOMAIN",
+        databaseURL: "VOTRE_DATABASE_URL",
+        projectId: "VOTRE_PROJECT_ID",
+        storageBucket: "VOTRE_STORAGE_BUCKET",
+        messagingSenderId: "VOTRE_SENDER_ID",
+        appId: "VOTRE_APP_ID"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+</script>
