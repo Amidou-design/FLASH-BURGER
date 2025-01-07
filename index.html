@@ -1,10 +1,8 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flash Burger</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,15 +62,108 @@
             background-color: black;
             margin-top: 20px;
         }
-        #qrcode-container {
+        #qr-code {
             display: none;
             text-align: center;
             margin-top: 20px;
         }
-        #qrcode {
-            margin: auto;
-        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let orderDetails = {
+                name: '',
+                phone: '',
+                items: []
+            };
+
+            // Fonction pour changer la quantité
+            function changeQuantity(item, delta) {
+                const quantityElement = document.getElementById(item + '-quantity');
+                let quantity = parseInt(quantityElement.innerText);
+                quantity += delta;
+
+                if (quantity < 0) {
+                    quantity = 0;
+                }
+
+                quantityElement.innerText = quantity;
+                updateOrderSummary(item, quantity);
+            }
+
+            // Fonction pour mettre à jour le résumé de la commande
+            function updateOrderSummary(item, quantity) {
+                const orderSummaryList = document.getElementById("order-summary-list");
+                const itemText = document.getElementById(item).querySelector('span').innerText;
+                let itemSummary = document.getElementById(item + '-summary');
+
+                if (!itemSummary) {
+                    itemSummary = document.createElement('li');
+                    itemSummary.id = item + '-summary';
+                    orderSummaryList.appendChild(itemSummary);
+                }
+
+                if (quantity > 0) {
+                    itemSummary.innerText = `${itemText} : ${quantity} x ${itemText.split(' ')[0]}`;
+                } else {
+                    orderSummaryList.removeChild(itemSummary);
+                }
+
+                orderDetails.items = [];
+                document.querySelectorAll('#order-summary-list li').forEach(li => {
+                    orderDetails.items.push(li.innerText);
+                });
+            }
+
+            // Fonction pour générer le QR code
+            function generateQRCode(data) {
+                const qrCodeContainer = document.getElementById("qr-code");
+                const qrCodeCanvas = document.createElement("canvas");
+
+                QRCode.toCanvas(qrCodeCanvas, data, function (error) {
+                    if (error) console.error(error);
+                    qrCodeContainer.appendChild(qrCodeCanvas);
+                    qrCodeContainer.style.display = "block";
+                });
+            }
+
+            // Gestion du formulaire de commande
+            const form = document.getElementById("order-form");
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                orderDetails.name = document.getElementById("name").value;
+                orderDetails.phone = document.getElementById("phone").value;
+
+                // Créer une chaîne de commande
+                const orderString = `Nom: ${orderDetails.name}\nTéléphone: ${orderDetails.phone}\nCommandes: ${orderDetails.items.join(", ")}`;
+
+                // Afficher le QR code
+                generateQRCode(orderString);
+
+                // Afficher le QR code pendant 30 secondes
+                setTimeout(function() {
+                    window.location.href = "https://wa.me/22657655600";
+                }, 30000);
+
+                // Sauvegarder la commande dans Firebase (non inclus ici mais vous pouvez ajouter votre code Firebase)
+
+                alert("Commande envoyée avec succès !");
+                form.reset();
+                document.getElementById("order-summary-list").innerHTML = '';
+            });
+
+            // Fonction pour ajuster la quantité
+            document.querySelectorAll('.menu-item').forEach(function(item) {
+                const itemId = item.id;
+                item.querySelectorAll('button').forEach(function(button) {
+                    button.addEventListener('click', function() {
+                        const delta = button.innerText === '+' ? 1 : -1;
+                        changeQuantity(itemId, delta);
+                    });
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <header>
@@ -93,57 +184,57 @@
             <div class="menu-item" id="panini-500">
                 <span>Panini 500F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('panini-500', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="panini-500-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('panini-500', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
             <div class="menu-item" id="panini-700">
                 <span>Panini 700F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('panini-700', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="panini-700-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('panini-700', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
             <div class="menu-item" id="panini-1000">
                 <span>Panini 1000F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('panini-1000', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="panini-1000-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('panini-1000', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
             <div class="menu-item" id="hamburger-1000">
                 <span>Hamburger 1000F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('hamburger-1000', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="hamburger-1000-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('hamburger-1000', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
             <div class="menu-item" id="hamburger-1500">
                 <span>Hamburger 1500F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('hamburger-1500', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="hamburger-1500-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('hamburger-1500', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
             <div class="menu-item" id="chawarma-1000">
                 <span>Chawarma 1000F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('chawarma-1000', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="chawarma-1000-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('chawarma-1000', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
             <div class="menu-item" id="chawarma-1500">
                 <span>Chawarma 1500F</span>
                 <div class="quantity-buttons">
-                    <button type="button" onclick="changeQuantity('chawarma-1500', -1)">-</button>
+                    <button type="button">-</button>
                     <span id="chawarma-1500-quantity">0</span>
-                    <button type="button" onclick="changeQuantity('chawarma-1500', 1)">+</button>
+                    <button type="button">+</button>
                 </div>
             </div>
 
@@ -156,67 +247,11 @@
             <button type="submit">Confirmer la commande</button>
         </form>
 
-        <!-- QR Code Display -->
-        <div id="qrcode-container">
-            <p>Voici votre QR Code :</p>
-            <div id="qrcode"></div>
-        </div>
+        <div id="qr-code"></div>
     </main>
 
     <footer>
-        <p>&copy; 2025 Flash Burger. Tous droits réservés.</p>
+        <p>&copy; 2025 Flash Burger. Tous droits réservés. Powered by BGi 00226 57 65 56 00</p>
     </footer>
-
-    <!-- Firebase Configuration -->
-    <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAxyjtA0xuEoYqnddA63jPH7ryMGuUVe2s",
-            authDomain: "flash-burger-app-fd2a0.firebaseapp.com",
-            databaseURL: "https://flash-burger-app-fd2a0-default-rtdb.firebaseio.com",
-            projectId: "flash-burger-app-fd2a0",
-            storageBucket: "flash-burger-app-fd2a0.firebasestorage.app",
-            messagingSenderId: "308641373614",
-            appId: "1:308641373614:web:2c8aa5498e0bcb546f7c3f",
-        };
-
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        const form = document.getElementById("order-form");
-        const qrCodeContainer = document.getElementById("qrcode-container");
-        const qrCodeElement = document.getElementById("qrcode");
-
-        let orderDetails = {
-            name: '',
-            phone: '',
-            items: []
-        };
-
-        function changeQuantity(item, delta) {
-            const quantityElement = document.getElementById(item + '-quantity');
-            let quantity = parseInt(quantityElement.innerText);
-            quantity += delta;
-
-            if (quantity < 0) {
-                quantity = 0;
-            }
-
-            quantityElement.innerText = quantity;
-            updateOrderSummary(item, quantity);
-        }
-
-        function updateOrderSummary(item, quantity) {
-            const orderSummaryList = document.getElementById("order-summary-list");
-            const itemText = document.getElementById(item).querySelector('span').innerText;
-            let itemSummary = document.getElementById(item + '-summary');
-
-            if (!itemSummary) {
-                itemSummary = document.createElement('li');
-                itemSummary.id = item + '-summary';
-                orderSummaryList.appendChild(itemSummary);
-            }
-
-            if (quantity > 0) {
-                itemSummary.innerText = `${itemText} : ${quantity} x ${itemText.split(' ')[0
+</body>
+</html>
